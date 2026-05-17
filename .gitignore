@@ -1,0 +1,73 @@
+# =========================
+# GLOBAL
+# =========================
+
+.DS_Store
+Thumbs.db
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# =========================
+# SYSTEM / GLOBAL NODE SAFETY
+# =========================
+
+node_modules/
+**/node_modules/
+
+# =========================
+# FRONT (Angular)
+# =========================
+
+front/node_modules/
+front/dist/
+front/.angular/
+front/.angular/cache/
+front/coverage/
+front/tmp/
+front/out-tsc/
+
+# =========================
+# BACK (Spring Boot / Java)
+# =========================
+
+back/target/
+back/build/
+back/logs/
+back/*.log
+back/.idea/
+back/.springBeans
+back/.sts4-cache
+*.class
+
+# Maven wrapper (optionnel, souvent on le commit mais safe ici)
+back/.mvn/wrapper/maven-wrapper.jar
+
+# =========================
+# ENV FILES (SECRETS)
+# =========================
+
+.env
+.env.*
+**/.env
+**/.env.*
+
+# =========================
+# DOCKER / DATA
+# =========================
+
+docker-data/
+postgres-data/
+
+# =========================
+# TEST / COVERAGE
+# =========================
+
+coverage/
+**/coverage/

@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16
+    container_name: amazonlike-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: amazonlike
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./back
+    container_name: amazonlike-back
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/amazonlike
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+  # FRONT DEV (DEFAULT)
+  frontend-dev:
+    build:
+      context: ./front
+      dockerfile: Dockerfile.dev
+    container_name: amazonlike-front-dev
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: npm start
+
+  # FRONT PROD
+  frontend:
+    build: ./front
+    container_name: amazonlike-front
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    profiles: ["prod"]
+    # Commande pour lancer la prod : docker compose --profile prod up
+
+volumes:
+  db_data:
