@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.amazonlike.back.user.role.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 
@@ -24,6 +25,7 @@ public class User {
   @Column(nullable = false, unique = true)
   private String email;
 
+  @JsonIgnore
   @Column(nullable = false)
   private String password;
 
@@ -40,6 +42,14 @@ public class User {
   private LocalDateTime createdAt;
 
   private LocalDateTime updatedAt;
+
+  public UUID getId() {
+    return id;
+  }
+
+  public void setId(UUID id) {
+    this.id = id;
+  }
 
   public String getEmail() {
     return email;
