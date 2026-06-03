@@ -34,13 +34,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       HttpServletResponse response,
       FilterChain filterChain) throws ServletException, IOException {
 
-    if (request.getCookies() == null) {
+    String path = request.getServletPath();
+
+    if (path.startsWith("/auth/")) {
       filterChain.doFilter(request, response);
       return;
     }
 
-    String token = Arrays.stream(request.getCookies())
-        .filter(c -> c.getName().equals("auth_token"))
+    Cookie[] cookies = request.getCookies();
+
+    if (cookies == null) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
+    String token = Arrays.stream(cookies)
+        .filter(c -> "auth_token".equals(c.getName()))
         .findFirst()
         .map(Cookie::getValue)
         .orElse(null);
@@ -62,10 +71,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       return;
     }
 
-    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-        user,
-        null,
-        List.of());
+    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, List.of());
 
     SecurityContextHolder.getContext().setAuthentication(auth);
 

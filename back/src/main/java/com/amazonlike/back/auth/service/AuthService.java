@@ -73,18 +73,18 @@ public class AuthService {
     User user = userRepository.findByEmail(request.getEmail())
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.UNAUTHORIZED,
-            "Les identifiants sont incorects"));
+            "Identifiants incorrects"));
 
     if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
       throw new ResponseStatusException(
           HttpStatus.UNAUTHORIZED,
-          "Les identifiants sont incorects");
+          "Identifiants incorrects");
     }
 
     if (!user.isEnabled() || user.isLocked()) {
       throw new ResponseStatusException(
           HttpStatus.FORBIDDEN,
-          "Votre compte à été suspendu");
+          "Compte désactivé");
     }
 
     // token invalidation system

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import com.amazonlike.back.user.entity.User;
 import com.amazonlike.back.user.repository.UserRepository;
@@ -23,6 +25,8 @@ public class UserService {
 
   public User getUserById(UUID id) {
     return userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("User not found"));
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "Utilisateur introuvable"));
   }
 }
