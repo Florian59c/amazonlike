@@ -37,7 +37,7 @@ public class User {
 
   private boolean locked = false;
 
-  private int tokenVersion;
+  private UUID tokenVersion;
 
   private LocalDateTime createdAt;
 
@@ -107,11 +107,11 @@ public class User {
     this.locked = locked;
   }
 
-  public int getTokenVersion() {
+  public UUID getTokenVersion() {
     return tokenVersion;
   }
 
-  public void setTokenVersion(int tokenVersion) {
+  public void setTokenVersion(UUID tokenVersion) {
     this.tokenVersion = tokenVersion;
   }
 }

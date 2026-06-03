@@ -1,8 +1,10 @@
 package com.amazonlike.back.auth.controller;
 
+import com.amazonlike.back.auth.dto.LoginDto;
 import com.amazonlike.back.auth.dto.RegisterDto;
 import com.amazonlike.back.auth.service.AuthService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -24,5 +26,13 @@ public class AuthController {
   public ResponseEntity<String> register(@Valid @RequestBody RegisterDto request) {
     authService.register(request);
     return ResponseEntity.ok("Votre compte a été créé avec succès");
+  }
+
+  @PostMapping("/login")
+  public ResponseEntity<String> login(
+      @Valid @RequestBody LoginDto request,
+      HttpServletResponse response) {
+    authService.login(request, response);
+    return ResponseEntity.ok("Connection réussi");
   }
 }
