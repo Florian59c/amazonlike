@@ -3,11 +3,13 @@ package com.amazonlike.back.auth.controller;
 import com.amazonlike.back.auth.dto.LoginDto;
 import com.amazonlike.back.auth.dto.RegisterDto;
 import com.amazonlike.back.auth.service.AuthService;
+import com.amazonlike.back.user.entity.User;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,5 +36,13 @@ public class AuthController {
       HttpServletResponse response) {
     authService.login(request, response);
     return ResponseEntity.ok("Connection réussi");
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<String> logout(
+      @AuthenticationPrincipal User user,
+      HttpServletResponse response) {
+    authService.logout(user, response);
+    return ResponseEntity.ok("Déconnection réussi");
   }
 }

@@ -99,7 +99,25 @@ public class AuthService {
         .secure(cookieProperties.isSecure())
         .path("/")
         .maxAge(cookieProperties.getMaxAge())
-        .sameSite("Strict") // 👈 ICI
+        .sameSite("Strict")
+        .build();
+
+    response.addHeader("Set-Cookie", cookie.toString());
+  }
+
+  public void logout(User user, HttpServletResponse response) {
+
+    if (user != null) {
+      user.setTokenVersion(UUID.randomUUID());
+      userRepository.save(user);
+    }
+
+    ResponseCookie cookie = ResponseCookie.from(cookieProperties.getName(), "")
+        .httpOnly(true)
+        .secure(cookieProperties.isSecure())
+        .path("/")
+        .maxAge(0) // suppression immédiate du cookie
+        .sameSite("Strict")
         .build();
 
     response.addHeader("Set-Cookie", cookie.toString());
