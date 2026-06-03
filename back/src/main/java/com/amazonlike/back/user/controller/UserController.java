@@ -4,13 +4,19 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.amazonlike.back.user.dto.UpdateProfileDto;
 import com.amazonlike.back.user.entity.User;
 import com.amazonlike.back.user.service.UserService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
@@ -30,5 +36,15 @@ public class UserController {
   @GetMapping("/{id}")
   public ResponseEntity<User> getUserById(@PathVariable UUID id) {
     return ResponseEntity.ok(userService.getUserById(id));
+  }
+
+  @PatchMapping("/updateProfile")
+  public ResponseEntity<String> updateProfile(
+      @AuthenticationPrincipal User user,
+      @Valid @RequestBody UpdateProfileDto request) {
+
+    userService.updateProfile(user, request);
+
+    return ResponseEntity.ok("Le profil a bien été modifié");
   }
 }

@@ -1,5 +1,6 @@
 package com.amazonlike.back.auth.jwt;
 
+import com.amazonlike.back.config.CookieProperties;
 import com.amazonlike.back.user.entity.User;
 import com.amazonlike.back.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -22,10 +23,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
   private final JwtService jwtService;
   private final UserRepository userRepository;
+  private final CookieProperties cookieProperties;
 
-  public JwtAuthFilter(JwtService jwtService, UserRepository userRepository) {
+  public JwtAuthFilter(
+      JwtService jwtService,
+      UserRepository userRepository,
+      CookieProperties cookieProperties) {
     this.jwtService = jwtService;
     this.userRepository = userRepository;
+    this.cookieProperties = cookieProperties;
   }
 
   @Override
@@ -48,8 +54,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       return;
     }
 
+    String cookieName = cookieProperties.getName();
+
     String token = Arrays.stream(cookies)
-        .filter(c -> "auth_token".equals(c.getName()))
+        .filter(c -> cookieName.equals(c.getName()))
         .findFirst()
         .map(Cookie::getValue)
         .orElse(null);
@@ -71,7 +79,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       return;
     }
 
-    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(user, null, List.of());
+    UsernamePasswordAuthenticationToken auth = UsernamePasswordAuthenticationToken.authenticated(
+        user, null, List.of());
 
     SecurityContextHolder.getContext().setAuthentication(auth);
 
