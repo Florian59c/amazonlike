@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.amazonlike.back.user.dto.UpdateProfileDto;
+import com.amazonlike.back.user.dto.UserProfileDto;
 import com.amazonlike.back.user.entity.User;
 import com.amazonlike.back.user.service.UserService;
 
@@ -36,6 +37,13 @@ public class UserController {
   @GetMapping("/{id}")
   public ResponseEntity<User> getUserById(@PathVariable UUID id) {
     return ResponseEntity.ok(userService.getUserById(id));
+  }
+
+  @GetMapping("/getProfile")
+  public ResponseEntity<UserProfileDto> getMyProfile(
+      @AuthenticationPrincipal User user) {
+
+    return ResponseEntity.ok(userService.getCurrentUserProfile(user));
   }
 
   @PatchMapping("/updateProfile")

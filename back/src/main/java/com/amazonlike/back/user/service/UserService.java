@@ -8,6 +8,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
 import com.amazonlike.back.user.dto.UpdateProfileDto;
+import com.amazonlike.back.user.dto.UserProfileDto;
 import com.amazonlike.back.user.entity.User;
 import com.amazonlike.back.user.repository.UserRepository;
 
@@ -29,6 +30,12 @@ public class UserService {
         .orElseThrow(() -> new ResponseStatusException(
             HttpStatus.NOT_FOUND,
             "Utilisateur introuvable"));
+  }
+
+  public UserProfileDto getCurrentUserProfile(User user) {
+    return new UserProfileDto(
+        user.getFirstName(),
+        user.getLastName());
   }
 
   public User updateProfile(User user, UpdateProfileDto request) {
