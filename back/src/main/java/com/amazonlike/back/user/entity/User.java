@@ -43,6 +43,8 @@ public class User {
 
   private LocalDateTime updatedAt;
 
+  private LocalDateTime deletedAt;
+
   public UUID getId() {
     return id;
   }
@@ -113,5 +115,29 @@ public class User {
 
   public void setTokenVersion(UUID tokenVersion) {
     this.tokenVersion = tokenVersion;
+  }
+
+  public LocalDateTime getCreatedAt() {
+    return createdAt;
+  }
+
+  public void setCreatedAt(LocalDateTime createdAt) {
+    this.createdAt = createdAt;
+  }
+
+  public LocalDateTime getUpdatedAt() {
+    return updatedAt;
+  }
+
+  public void setUpdatedAt(LocalDateTime updatedAt) {
+    this.updatedAt = updatedAt;
+  }
+
+  public LocalDateTime getDeletedAt() {
+    return deletedAt;
+  }
+
+  public void setDeletedAt(LocalDateTime deletedAt) {
+    this.deletedAt = deletedAt;
   }
 }

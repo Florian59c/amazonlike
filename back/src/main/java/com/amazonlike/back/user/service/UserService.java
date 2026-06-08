@@ -1,5 +1,6 @@
 package com.amazonlike.back.user.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,5 +45,15 @@ public class UserService {
     user.setLastName(request.getLastName());
 
     return userRepository.save(user);
+  }
+
+  public void deleteCurrentUser(User user) {
+
+    user.setEnabled(false);
+    user.setLocked(true);
+    user.setDeletedAt(LocalDateTime.now());
+    user.setTokenVersion(UUID.randomUUID());
+
+    userRepository.save(user);
   }
 }

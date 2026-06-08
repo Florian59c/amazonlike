@@ -43,19 +43,39 @@ public class AuthService {
   }
 
   public void register(RegisterDto request) {
+
     if (!request.getPassword().equals(request.getConfirmPassword())) {
       throw new ResponseStatusException(
           HttpStatus.BAD_REQUEST,
           "Les mots de passe ne correspondent pas");
     }
 
-    if (userRepository.existsByEmail(request.getEmail())) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_REQUEST,
-          "Cette adresse email est déjà utilisée");
+    User existing = userRepository.findByEmail(request.getEmail()).orElse(null);
+
+    if (existing != null) {
+
+      boolean accountDeleted = existing.getDeletedAt() != null;
+
+      if (!accountDeleted) {
+        throw new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Cette adresse email est déjà utilisée");
+      }
+
+      existing.setFirstName(request.getFirstName());
+      existing.setLastName(request.getLastName());
+      existing.setPassword(passwordEncoder.encode(request.getPassword()));
+      existing.setEnabled(true);
+      existing.setLocked(false);
+      existing.setDeletedAt(null);
+      existing.setTokenVersion(UUID.randomUUID());
+
+      userRepository.save(existing);
+      return;
     }
 
     User user = new User();
+
     user.setEmail(request.getEmail());
     user.setPassword(passwordEncoder.encode(request.getPassword()));
     user.setFirstName(request.getFirstName());
@@ -75,16 +95,16 @@ public class AuthService {
             HttpStatus.UNAUTHORIZED,
             "Identifiants incorrects"));
 
+    if (!user.isEnabled() || user.isLocked() || user.getDeletedAt() != null) {
+      throw new ResponseStatusException(
+          HttpStatus.FORBIDDEN,
+          "Compte désactivé");
+    }
+
     if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
       throw new ResponseStatusException(
           HttpStatus.UNAUTHORIZED,
           "Identifiants incorrects");
-    }
-
-    if (!user.isEnabled() || user.isLocked()) {
-      throw new ResponseStatusException(
-          HttpStatus.FORBIDDEN,
-          "Compte désactivé");
     }
 
     // token invalidation system

@@ -29,6 +29,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       JwtService jwtService,
       UserRepository userRepository,
       CookieProperties cookieProperties) {
+
     this.jwtService = jwtService;
     this.userRepository = userRepository;
     this.cookieProperties = cookieProperties;
@@ -38,10 +39,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   protected void doFilterInternal(
       HttpServletRequest request,
       HttpServletResponse response,
-      FilterChain filterChain) throws ServletException, IOException {
+      FilterChain filterChain)
+      throws ServletException, IOException {
 
     String path = request.getServletPath();
 
+    // ignore les routes auth
     if (path.startsWith("/auth/")) {
       filterChain.doFilter(request, response);
       return;
@@ -57,12 +60,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     String cookieName = cookieProperties.getName();
 
     String token = Arrays.stream(cookies)
-        .filter(c -> cookieName.equals(c.getName()))
+        .filter(cookie -> cookieName.equals(cookie.getName()))
         .findFirst()
         .map(Cookie::getValue)
         .orElse(null);
 
-    if (token == null || !jwtService.isTokenValid(token)) {
+    // token absent
+    if (token == null) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
+    // token invalide
+    if (!jwtService.isTokenValid(token)) {
+      SecurityContextHolder.clearContext();
+
       filterChain.doFilter(request, response);
       return;
     }
@@ -70,19 +82,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     String userId = jwtService.extractUserId(token);
     String tokenVersion = jwtService.extractTokenVersion(token);
 
-    User user = userRepository.findById(UUID.fromString(userId)).orElse(null);
+    User user = userRepository.findById(UUID.fromString(userId))
+        .orElse(null);
 
-    if (user == null ||
-        user.getTokenVersion() == null ||
-        !user.getTokenVersion().toString().equals(tokenVersion)) {
+    // vérifications sécurité
+    if (user == null
+        || user.getTokenVersion() == null
+        || !user.getTokenVersion().toString().equals(tokenVersion)
+        || !user.isEnabled()
+        || user.isLocked()
+        || user.getDeletedAt() != null) {
+
+      SecurityContextHolder.clearContext();
+
       filterChain.doFilter(request, response);
       return;
     }
 
-    UsernamePasswordAuthenticationToken auth = UsernamePasswordAuthenticationToken.authenticated(
-        user, null, List.of());
+    UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
+        user,
+        null,
+        List.of());
 
-    SecurityContextHolder.getContext().setAuthentication(auth);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
 
     filterChain.doFilter(request, response);
   }

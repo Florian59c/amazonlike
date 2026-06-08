@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,5 +55,14 @@ public class UserController {
     userService.updateProfile(user, request);
 
     return ResponseEntity.ok("Le profil a bien été modifié");
+  }
+
+  @DeleteMapping("/deleteAccount")
+  public ResponseEntity<String> deleteAccount(
+      @AuthenticationPrincipal User user) {
+
+    userService.deleteCurrentUser(user);
+
+    return ResponseEntity.ok("Compte désactivé");
   }
 }
