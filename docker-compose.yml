@@ -14,16 +14,27 @@ services:
       - db_data:/var/lib/postgresql/data
 
   backend:
-    build: ./back
+    image: maven:3.9.9-eclipse-temurin-17
     container_name: amazonlike-back
+    working_dir: /app
     ports:
       - "8080:8080"
     depends_on:
       - db
+    volumes:
+      - ./back:/app
+      - ~/.m2:/root/.m2
+    command: mvn spring-boot:run
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/amazonlike
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DEVTOOLS_RESTART_ENABLED: "true"
+      JWT_SECRET: ciq8g%veGX5-khkA+767HEPPNa5D:25T4{aC].8;Z@4d6!=3w?
+      JWT_EXPIRATION_MS: 604800000
+      COOKIE_NAME: auth_token
+      COOKIE_SECURE: false
+      COOKIE_MAX_AGE: 604800
 
   # FRONT DEV (DEFAULT)
   frontend-dev:

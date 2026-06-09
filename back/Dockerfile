@@ -1,9 +1,10 @@
-FROM eclipse-temurin:17-jdk
+FROM maven:3.9.9-eclipse-temurin-17
 
 WORKDIR /app
 
-COPY target/*.jar app.jar
+COPY pom.xml .
+COPY src ./src
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["mvn", "spring-boot:run"]
