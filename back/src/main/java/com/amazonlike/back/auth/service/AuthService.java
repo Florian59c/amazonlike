@@ -2,9 +2,12 @@ package com.amazonlike.back.auth.service;
 
 import com.amazonlike.back.auth.dto.LoginDto;
 import com.amazonlike.back.auth.dto.RegisterDto;
+import com.amazonlike.back.auth.entity.PasswordResetToken;
 import com.amazonlike.back.auth.jwt.JwtService;
+import com.amazonlike.back.auth.repository.PasswordResetTokenRepository;
 import com.amazonlike.back.config.CookieProperties;
 import com.amazonlike.back.config.JwtProperties;
+import com.amazonlike.back.mail.service.MailService;
 import com.amazonlike.back.user.entity.User;
 import com.amazonlike.back.user.repository.UserRepository;
 import com.amazonlike.back.user.role.Role;
@@ -12,6 +15,7 @@ import com.amazonlike.back.user.role.Role;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -28,18 +32,24 @@ public class AuthService {
   private final JwtService jwtService;
   private final CookieProperties cookieProperties;
   private final JwtProperties jwtProperties;
+  private final PasswordResetTokenRepository passwordResetTokenRepository;
+  private final MailService mailService;
 
   public AuthService(
       UserRepository userRepository,
       PasswordEncoder passwordEncoder,
       JwtService jwtService,
       CookieProperties cookieProperties,
-      JwtProperties jwtProperties) {
+      JwtProperties jwtProperties,
+      PasswordResetTokenRepository passwordResetTokenRepository,
+      MailService mailService) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.jwtService = jwtService;
     this.cookieProperties = cookieProperties;
     this.jwtProperties = jwtProperties;
+    this.passwordResetTokenRepository = passwordResetTokenRepository;
+    this.mailService = mailService;
   }
 
   public void register(RegisterDto request) {
@@ -141,5 +151,29 @@ public class AuthService {
         .build();
 
     response.addHeader("Set-Cookie", cookie.toString());
+  }
+
+  public void forgotPassword(String email) {
+
+    User user = userRepository.findByEmail(email)
+        .orElse(null);
+
+    if (user == null) {
+      return; // silent fail : on ne retourne rien si user null par mesure de sécurité pour
+              // eviter d'informer sur l'existence de l'email en base de données
+    }
+
+    passwordResetTokenRepository.deleteByUser(user); // suppression des anciens tokens
+
+    String token = UUID.randomUUID().toString();
+
+    PasswordResetToken resetToken = new PasswordResetToken();
+    resetToken.setToken(token);
+    resetToken.setUser(user);
+    resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+
+    passwordResetTokenRepository.save(resetToken);
+
+    mailService.sendResetPasswordMail(user.getEmail(), token);
   }
 }
