@@ -1,5 +1,6 @@
 package com.amazonlike.back.auth.controller;
 
+import com.amazonlike.back.auth.dto.ForgotPasswordDto;
 import com.amazonlike.back.auth.dto.LoginDto;
 import com.amazonlike.back.auth.dto.RegisterDto;
 import com.amazonlike.back.auth.service.AuthService;
@@ -44,5 +45,13 @@ public class AuthController {
       HttpServletResponse response) {
     authService.logout(user, response);
     return ResponseEntity.ok("Déconnection réussi");
+  }
+
+  @PostMapping("/forgot-password")
+  public ResponseEntity<String> forgotPassword(@RequestBody @Valid ForgotPasswordDto request) {
+    authService.forgotPassword(request.getEmail());
+
+    return ResponseEntity.ok(
+        "Si cet email existe, un lien de réinitialisation a été envoyé");
   }
 }
