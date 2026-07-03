@@ -3,6 +3,7 @@ package com.amazonlike.back.auth.controller;
 import com.amazonlike.back.auth.dto.ForgotPasswordDto;
 import com.amazonlike.back.auth.dto.LoginDto;
 import com.amazonlike.back.auth.dto.RegisterDto;
+import com.amazonlike.back.auth.dto.ResetPasswordDto;
 import com.amazonlike.back.auth.service.AuthService;
 import com.amazonlike.back.user.entity.User;
 
@@ -53,5 +54,12 @@ public class AuthController {
 
     return ResponseEntity.ok(
         "Si cet email existe, un lien de réinitialisation a été envoyé");
+  }
+
+  @PostMapping("/reset-password")
+  public ResponseEntity<String> resetPassword(
+      @RequestBody @Valid ResetPasswordDto request) {
+    authService.resetPassword(request);
+    return ResponseEntity.ok("Mot de passe mis à jour avec succès");
   }
 }

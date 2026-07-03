@@ -2,6 +2,7 @@ package com.amazonlike.back.auth.service;
 
 import com.amazonlike.back.auth.dto.LoginDto;
 import com.amazonlike.back.auth.dto.RegisterDto;
+import com.amazonlike.back.auth.dto.ResetPasswordDto;
 import com.amazonlike.back.auth.entity.PasswordResetToken;
 import com.amazonlike.back.auth.jwt.JwtService;
 import com.amazonlike.back.auth.repository.PasswordResetTokenRepository;
@@ -14,6 +15,7 @@ import com.amazonlike.back.user.role.Role;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -153,6 +155,7 @@ public class AuthService {
     response.addHeader("Set-Cookie", cookie.toString());
   }
 
+  @Transactional
   public void forgotPassword(String email) {
 
     User user = userRepository.findByEmail(email)
@@ -175,5 +178,34 @@ public class AuthService {
     passwordResetTokenRepository.save(resetToken);
 
     mailService.sendResetPasswordMail(user.getEmail(), token);
+  }
+
+  public void resetPassword(ResetPasswordDto request) {
+
+    if (!request.getPassword().equals(request.getConfirmPassword())) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Les mots de passe ne correspondent pas");
+    }
+
+    PasswordResetToken resetToken = passwordResetTokenRepository
+        .findByToken(request.getToken())
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.BAD_REQUEST,
+            "Le token est invalide"));
+
+    if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Le token a expiré");
+    }
+
+    User user = resetToken.getUser();
+
+    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    userRepository.save(user);
+
+    // invalide le token après la modification réussie du mot de passe
+    passwordResetTokenRepository.delete(resetToken);
   }
 }
