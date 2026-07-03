@@ -14,6 +14,7 @@ import com.amazonlike.back.user.role.Role;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -153,6 +154,7 @@ public class AuthService {
     response.addHeader("Set-Cookie", cookie.toString());
   }
 
+  @Transactional
   public void forgotPassword(String email) {
 
     User user = userRepository.findByEmail(email)
