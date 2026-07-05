@@ -9,10 +9,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.amazonlike.back.user.dto.UpdateEmailRequestDto;
 import com.amazonlike.back.user.dto.UpdateProfileDto;
 import com.amazonlike.back.user.dto.UserProfileDto;
 import com.amazonlike.back.user.entity.User;
@@ -64,5 +66,16 @@ public class UserController {
     userService.deleteCurrentUser(user);
 
     return ResponseEntity.ok("Compte désactivé");
+  }
+
+  @PostMapping("/request-email-update")
+  public ResponseEntity<String> requestEmailUpdate(
+      @AuthenticationPrincipal User user,
+      @Valid @RequestBody UpdateEmailRequestDto request) {
+
+    userService.requestEmailUpdate(user, request);
+
+    return ResponseEntity.ok(
+        "Un e-mail de confirmation a été envoyé");
   }
 }

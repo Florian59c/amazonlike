@@ -44,37 +44,34 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     String path = request.getServletPath();
 
-    // ignore les routes auth
+    // ignore routes publiques
     if (path.startsWith("/auth/")) {
       filterChain.doFilter(request, response);
       return;
     }
 
     Cookie[] cookies = request.getCookies();
-
-    if (cookies == null) {
-      filterChain.doFilter(request, response);
-      return;
-    }
+    String token = null;
 
     String cookieName = cookieProperties.getName();
 
-    String token = Arrays.stream(cookies)
-        .filter(cookie -> cookieName.equals(cookie.getName()))
-        .findFirst()
-        .map(Cookie::getValue)
-        .orElse(null);
+    if (cookies != null) {
+      token = Arrays.stream(cookies)
+          .filter(c -> cookieName.equals(c.getName()))
+          .map(Cookie::getValue)
+          .findFirst()
+          .orElse(null);
+    }
 
-    // token absent
+    // SI PAS DE TOKEN → ON NE FAIT RIEN (Spring décidera)
     if (token == null) {
       filterChain.doFilter(request, response);
       return;
     }
 
-    // token invalide
+    // TOKEN INVALIDE → ON CONTINUE SANS AUTH
     if (!jwtService.isTokenValid(token)) {
       SecurityContextHolder.clearContext();
-
       filterChain.doFilter(request, response);
       return;
     }
@@ -82,10 +79,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     String userId = jwtService.extractUserId(token);
     String tokenVersion = jwtService.extractTokenVersion(token);
 
-    User user = userRepository.findById(UUID.fromString(userId))
-        .orElse(null);
+    User user = userRepository.findById(UUID.fromString(userId)).orElse(null);
 
-    // vérifications sécurité
+    // USER INVALID → PAS D'AUTH
     if (user == null
         || user.getTokenVersion() == null
         || !user.getTokenVersion().toString().equals(tokenVersion)
@@ -94,11 +90,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         || user.getDeletedAt() != null) {
 
       SecurityContextHolder.clearContext();
-
       filterChain.doFilter(request, response);
       return;
     }
 
+    // AUTH OK → ON SET LE CONTEXT
     UsernamePasswordAuthenticationToken authentication = UsernamePasswordAuthenticationToken.authenticated(
         user,
         null,
