@@ -21,6 +21,22 @@ spring:
     livereload:
       enabled: true
 
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 2525
+    username: a682d8d9630c0b
+    password: f1c493fb415bd1
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  frontend:
+    url: http://localhost:3000
+
 server:
   error:
     include-message: always
