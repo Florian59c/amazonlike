@@ -5,4 +5,12 @@ public interface MailService {
   void sendResetPasswordMail(
       String email,
       String token);
+
+  void sendUpdateEmailMail(
+      String email,
+      String token);
+
+  void sendEmailChangeEmails(
+      String oldEmail,
+      String newEmail);
 }
