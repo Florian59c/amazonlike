@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.amazonlike.back.user.dto.ConfirmEmailUpdateDto;
 import com.amazonlike.back.user.dto.UpdateEmailRequestDto;
 import com.amazonlike.back.user.dto.UpdateProfileDto;
 import com.amazonlike.back.user.dto.UserProfileDto;
@@ -77,5 +78,15 @@ public class UserController {
 
     return ResponseEntity.ok(
         "Un e-mail de confirmation a été envoyé");
+  }
+
+  @PatchMapping("/confirm-email-update")
+  public ResponseEntity<String> confirmEmailUpdate(
+      @Valid @RequestBody ConfirmEmailUpdateDto request) {
+
+    userService.confirmEmailUpdate(request.getToken());
+
+    return ResponseEntity.ok(
+        "Adresse e-mail mise à jour");
   }
 }

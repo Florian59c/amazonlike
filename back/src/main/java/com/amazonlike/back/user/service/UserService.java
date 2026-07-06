@@ -103,4 +103,46 @@ public class UserService {
         user.getEmail(),
         token.getToken());
   }
+
+  @Transactional
+  public void confirmEmailUpdate(String tokenValue) {
+
+    EmailUpdateToken token = emailUpdateTokenRepository
+        .findByToken(tokenValue)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "Token invalide"));
+
+    if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
+
+      emailUpdateTokenRepository.delete(token);
+
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "Le token a expiré");
+    }
+
+    User user = token.getUser();
+
+    String oldEmail = token.getOldEmail();
+    String newEmail = token.getNewEmail();
+
+    if (!user.getEmail().equals(oldEmail)) {
+      throw new ResponseStatusException(
+          HttpStatus.BAD_REQUEST,
+          "L'adresse e-mail actuelle ne correspond plus");
+    }
+
+    if (userRepository.existsByEmail(newEmail)) {
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "Cette adresse e-mail est déjà utilisée");
+    }
+
+    user.setEmail(newEmail);
+
+    userRepository.save(user);
+
+    emailUpdateTokenRepository.delete(token);
+  }
 }
