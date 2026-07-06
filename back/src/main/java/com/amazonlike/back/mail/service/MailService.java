@@ -9,4 +9,8 @@ public interface MailService {
   void sendUpdateEmailMail(
       String email,
       String token);
+
+  void sendEmailChangeEmails(
+      String oldEmail,
+      String newEmail);
 }

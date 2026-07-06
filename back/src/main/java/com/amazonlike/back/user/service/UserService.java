@@ -144,5 +144,7 @@ public class UserService {
     userRepository.save(user);
 
     emailUpdateTokenRepository.delete(token);
+
+    mailService.sendEmailChangeEmails(oldEmail, newEmail);
   }
 }
